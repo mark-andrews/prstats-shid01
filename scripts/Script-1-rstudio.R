@@ -34,18 +34,43 @@ shinyApp(ui, server)
 library(tidyverse)
 
 ui <- fluidPage(
-  sliderInput("bins", "Number of histogram bins", min = 10, max = 100, value = 30),
+  sliderInput("bins", "Number of histogram bins", min = 10, max = 100, step = 10, ticks = FALSE, value = 40),
+  sliderInput("n", "Sample size", min = 1000, max = 10000, value = 2500),
+  sliderInput("mean", "Mean of normal distribution", min = 50, max = 150, value = 100),
+  sliderInput("sd", "Std dev of the normal distribution", min = 5, max = 50, value = 15),
   plotOutput("histogram")
 )
 
 server <- function(input, output){
   output$histogram <- renderPlot(
     {
-      data_df <- tibble(x = rnorm(n = 100, mean = 100, sd = 15))    
+      data_df <- tibble(x = rnorm(n = input$n, mean = input$mean, sd = input$sd))    
       ggplot(data_df, aes(x = x)) + 
-        geom_histogram(bins = input$bins)
+        geom_histogram(bins = input$bins, color = 'white') + 
+        theme_classic()
     }
   )  
 }
 
 shinyApp(ui, server)
+
+# Select from dropdown ----------------------------------------------------
+
+ui <- fluidPage(
+  selectInput()
+  plotOutput("histogram")
+)
+
+server <- function(input, output){
+  output$histogram <- renderPlot(
+    {
+      data_df <- tibble(x = rnorm(n = input$n, mean = input$mean, sd = input$sd))    
+      ggplot(data_df, aes(x = x)) + 
+        geom_histogram(bins = input$bins, color = 'white') + 
+        theme_classic()
+    }
+  )  
+}
+
+shinyApp(ui, server)
+
