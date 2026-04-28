@@ -114,3 +114,21 @@ server <- function(input, output){
 shinyApp(ui, server)
 
 
+# Checkbox group ----------------------------------------------------------
+
+ui <- fluidPage(
+  checkboxGroupInput("variables", "Variables to display", 
+                     choices = c("mpg", "cyl", "wt", "drat", "hp"),
+                     selected = c("wt", "hp")
+  ),
+  tableOutput("mtcars")
+)
+
+server <- function(input, output){
+  output$mtcars <- renderTable({
+    head(mtcars[,input$variables])
+  })
+}
+
+shinyApp(ui, server)
+
