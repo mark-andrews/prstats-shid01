@@ -155,3 +155,30 @@ server <- function(input, output){
 
 shinyApp(ui, server)
 
+
+# Data table --------------------------------------------------------------
+
+ui <- fluidPage(
+  dataTableOutput("mytable")
+)
+
+server <- function(input, output){
+  output$mytable <- renderDataTable(mtcars)
+}
+
+shinyApp(ui, server)
+
+
+
+# Verbatim/code formatted text ------------------------------------------------
+
+ui <- fluidPage(
+  radioButtons("variable", "Select a variable", choices = colnames(mtcars)),
+  verbatimTextOutput("variable_summary")
+)
+
+server <- function(input, output){
+  output$variable_summary <- renderPrint(summary(mtcars[[input$variable]]))
+}
+
+shinyApp(ui, server)
