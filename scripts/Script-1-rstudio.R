@@ -126,8 +126,31 @@ ui <- fluidPage(
 
 server <- function(input, output){
   output$mtcars <- renderTable({
+    req(input$variables)
     head(mtcars[,input$variables])
   })
+}
+
+shinyApp(ui, server)
+
+
+# Action button -----------------------------------------------------------
+
+
+ui <- fluidPage(
+  actionButton("resample", "Generate new sample"),
+  plotOutput("scatter")
+)
+
+server <- function(input, output){
+  output$scatter <- renderPlot(
+  {
+   input$resample
+   x <- rnorm(50)
+   y <- rnorm(50)
+   plot(x, y)
+  }
+  )
 }
 
 shinyApp(ui, server)
