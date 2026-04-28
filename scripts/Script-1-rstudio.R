@@ -182,3 +182,49 @@ server <- function(input, output){
 }
 
 shinyApp(ui, server)
+
+# Pretty printed text -----------------------------------------------------
+
+ui <- fluidPage(
+  radioButtons("variable", "Select a variable", choices = colnames(mtcars)),
+  p("The mean is", textOutput("variable_mean", inline = TRUE), ". ")
+)
+
+server <- function(input, output){
+ output$variable_mean <- renderText(round(mean(mtcars[[input$variable]]), 2)) 
+}
+
+shinyApp(ui, server)
+
+
+
+# Sidebar layout ----------------------------------------------------------
+
+
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("bins", "Number of histogram bins", min = 10, max = 100, step = 10, ticks = FALSE, value = 40),
+      sliderInput("n", "Sample size", min = 1000, max = 10000, value = 2500),
+      sliderInput("mean", "Mean of normal distribution", min = 50, max = 150, value = 100),
+      sliderInput("sd", "Std dev of the normal distribution", min = 5, max = 50, value = 15),     
+    ),
+    mainPanel(
+      plotOutput("histogram")
+    )
+  )
+)
+
+server <- function(input, output){
+  output$histogram <- renderPlot(
+    {
+      data_df <- tibble(x = rnorm(n = input$n, mean = input$mean, sd = input$sd))    
+      ggplot(data_df, aes(x = x)) + 
+        geom_histogram(bins = input$bins, color = 'white') + 
+        theme_classic()
+    }
+  )  
+}
+
+shinyApp(ui, server)
