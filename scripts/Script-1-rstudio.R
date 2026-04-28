@@ -200,8 +200,6 @@ shinyApp(ui, server)
 
 # Sidebar layout ----------------------------------------------------------
 
-
-
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
@@ -225,6 +223,103 @@ server <- function(input, output){
         theme_classic()
     }
   )  
+}
+
+shinyApp(ui, server)
+
+# Sidebar layout (flipped left/right) -----------------------------------------
+
+ui <- fluidPage(
+  sidebarLayout(
+    mainPanel(
+      plotOutput("histogram")
+    ),
+    sidebarPanel(
+      sliderInput("bins", "Number of histogram bins", min = 10, max = 100, step = 10, ticks = FALSE, value = 40),
+      sliderInput("n", "Sample size", min = 1000, max = 10000, value = 2500),
+      sliderInput("mean", "Mean of normal distribution", min = 50, max = 150, value = 100),
+      sliderInput("sd", "Std dev of the normal distribution", min = 5, max = 50, value = 15),     
+    )
+  )
+)
+
+server <- function(input, output){
+  output$histogram <- renderPlot(
+    {
+      data_df <- tibble(x = rnorm(n = input$n, mean = input$mean, sd = input$sd))    
+      ggplot(data_df, aes(x = x)) + 
+        geom_histogram(bins = input$bins, color = 'white') + 
+        theme_classic()
+    }
+  )  
+}
+
+shinyApp(ui, server)
+
+
+# Sidebar layout (main panel less wide) ---------------------------------------
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("bins", "Number of histogram bins", min = 10, max = 100, step = 10, ticks = FALSE, value = 40),
+      sliderInput("n", "Sample size", min = 1000, max = 10000, value = 2500),
+      sliderInput("mean", "Mean of normal distribution", min = 50, max = 150, value = 100),
+      sliderInput("sd", "Std dev of the normal distribution", min = 5, max = 50, value = 15), 
+      width = 2
+    ),
+    mainPanel(
+      plotOutput("histogram"), width = 4
+    )
+  )
+)
+
+server <- function(input, output){
+  output$histogram <- renderPlot(
+    {
+      data_df <- tibble(x = rnorm(n = input$n, mean = input$mean, sd = input$sd))    
+      ggplot(data_df, aes(x = x)) + 
+        geom_histogram(bins = input$bins, color = 'white') + 
+        theme_classic()
+    }
+  )  
+}
+
+shinyApp(ui, server)
+
+# Sidebar layout with fluid row in main panel --------------------------------
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("bins", "Number of histogram bins", min = 10, max = 100, step = 10, ticks = FALSE, value = 40),
+      sliderInput("n", "Sample size", min = 1000, max = 10000, value = 2500),
+      sliderInput("mean", "Mean of normal distribution", min = 50, max = 150, value = 100),
+      sliderInput("sd", "Std dev of the normal distribution", min = 5, max = 50, value = 15)
+    ),
+    mainPanel(
+      fluidRow(
+        column(6, plotOutput("histogram")),
+        column(6, verbatimTextOutput("summary"))
+      )
+    )
+  )
+)
+
+server <- function(input, output){
+  output$histogram <- renderPlot(
+    {
+      data_df <- tibble(x = rnorm(n = input$n, mean = input$mean, sd = input$sd))    
+      ggplot(data_df, aes(x = x)) + 
+        geom_histogram(bins = input$bins, color = 'white') + 
+        theme_classic()
+    }
+  )
+  
+  output$summary <- renderPrint({
+      data_df <- tibble(x = rnorm(n = input$n, mean = input$mean, sd = input$sd))    
+      summary(data_df$x)
+  })
 }
 
 shinyApp(ui, server)
