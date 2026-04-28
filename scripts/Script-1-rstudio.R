@@ -323,3 +323,96 @@ server <- function(input, output){
 }
 
 shinyApp(ui, server)
+
+# Reactivity with reactive ----------------------------------------------------
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      sliderInput("bins", "Number of histogram bins", min = 10, max = 100, step = 10, ticks = FALSE, value = 40),
+      sliderInput("n", "Sample size", min = 1000, max = 10000, value = 2500),
+      sliderInput("mean", "Mean of normal distribution", min = 50, max = 150, value = 100),
+      sliderInput("sd", "Std dev of the normal distribution", min = 5, max = 50, value = 15)
+    ),
+    mainPanel(
+      fluidRow(
+        column(6, plotOutput("histogram")),
+        column(6, verbatimTextOutput("summary"))
+      )
+    )
+  )
+)
+
+server <- function(input, output){
+  samples <- reactive({
+    rnorm(n = input$n, mean = input$mean, sd = input$sd)
+  })
+  
+  output$histogram <- renderPlot(
+    {
+      data_df <- tibble(x = samples())
+      ggplot(data_df, aes(x = x)) + 
+        geom_histogram(bins = input$bins, color = 'white') + 
+        theme_classic()
+    }
+  )
+  
+  output$summary <- renderPrint({
+      summary(samples())
+  })
+}
+
+shinyApp(ui, server)
+
+
+# dependent selectors -----------------------------------------------------
+
+datasets <- list(
+  mtcars = mtcars, # or else e.g. mtcars = read_csv("....")
+  iris = iris,
+  airquality = airquality
+)
+
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      selectInput('dataset', "Select the data set", choices =  names(datasets)),
+      selectInput("xvar", "Select the x variable", choices = NULL),
+      selectInput("yvar", "Select the y variable", choices = NULL),
+      width = 4
+    ),
+    mainPanel(
+     plotOutput("scatter") ,
+     width = 8
+    )
+  )
+)
+
+server <- function(input, output, session){
+  
+  observeEvent(input$dataset, {
+    
+    # only numeric columns can be selected
+    cols <- datasets[[input$dataset]] |> select(where(is.numeric)) |> colnames()
+    
+    # i.e. that which was selected by selectInput("dataset", ....)
+    updateSelectInput(session, "xvar", choices = cols, selected = cols[1])
+    updateSelectInput(session, "yvar", choices = cols, selected = cols[2])
+  }
+  )
+  
+  output$scatter <- renderPlot({
+    # xvar and yvar must not be NULL
+    req(input$xvar, input$yvar)
+    # xvar and yvar must be in the selected dataset
+    # 
+    req(input$xvar %in% names(datasets[[input$dataset]]),
+        input$yvar %in% names(datasets[[input$dataset]]))
+    data_df <- datasets[[input$dataset]]
+    ggplot(data_df, aes(x = .data[[input$xvar]], y = .data[[input$yvar]])) + 
+      geom_point()
+  })
+}
+
+shinyApp(ui, server)
