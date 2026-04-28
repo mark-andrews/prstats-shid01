@@ -62,6 +62,10 @@ The emphasis is on building sufficient foundational competence that participants
 - All examples use statistical analyses and data visualisation applications
 - Complete R code and materials provided for independent learning after the course
 
+### Guides
+
+Workshop guides and additional resources for the course can be found [here](https://courses.mjandrews.org/shiny-r/).
+
 ### Software
 
 Software requirements and installation instructions are in [software.md](software.md).
