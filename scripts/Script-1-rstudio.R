@@ -83,3 +83,34 @@ server <- function(input, output){
 
 shinyApp(ui, server)
 
+
+# Radio buttons -----------------------------------------------------------
+
+ui <- fluidPage(
+  radioButtons("distribution", "Select a probability distribution",
+              choices = c("Normal" = "norm",
+                          "Exponential" = "exp",
+                          "Uniform" = "unif")),
+  plotOutput("histogram")
+)
+
+server <- function(input, output){
+  output$histogram <- renderPlot(
+    {
+      
+      x <- switch(input$distribution, 
+                  norm = rnorm(500),
+                  exp = rexp(500),
+                  unif = runif(500))
+      
+      data_df <- tibble(x = x)
+      ggplot(data_df, aes(x = x)) + 
+        geom_histogram(bins = 50, color = 'white') + 
+        theme_classic()
+    }
+  )  
+}
+
+shinyApp(ui, server)
+
+
