@@ -51,3 +51,35 @@ server <- function(input, output){
 }
 
 shinyApp(ui, server)
+
+# Tabbed panels -----------------------------------------------------------
+
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      radioButtons("variable", "Select a variable", choices = colnames(mtcars))
+    ),
+    mainPanel(
+       tabsetPanel(
+        tabPanel("Histogram", plotOutput("hist")),
+        tabPanel("Summary", verbatimTextOutput('summary')),
+        tabPanel("Data", tableOutput('table'))
+      )     
+    )
+  )
+)
+
+
+server <- function(input, output){
+  output$hist <- renderPlot({
+    ggplot(mtcars, aes(x = .data[[input$variable]])) + histogram(bins = 10)
+  })
+  
+  output$summary <- renderPrint({
+    summary(mtcars[[input$variable]])
+  })
+  
+  output$table <- renderTable({
+    mtcars[input$variable]
+  }, rownames = TRUE)
+}
