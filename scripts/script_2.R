@@ -72,7 +72,7 @@ ui <- fluidPage(
 
 server <- function(input, output){
   output$hist <- renderPlot({
-    ggplot(mtcars, aes(x = .data[[input$variable]])) + histogram(bins = 10)
+    ggplot(mtcars, aes(x = .data[[input$variable]])) + geom_histogram(bins = 10)
   })
   
   output$summary <- renderPrint({
@@ -83,3 +83,5 @@ server <- function(input, output){
     mtcars[input$variable]
   }, rownames = TRUE)
 }
+
+shinyApp(ui, server)
