@@ -85,3 +85,59 @@ server <- function(input, output){
 }
 
 shinyApp(ui, server)
+
+
+
+# Selecting rectangles with the brush -------------------------------------
+
+ui <- fluidPage(
+  fluidRow(
+    column(8, plotOutput("scatter", brush = 'brush')),
+    column(4, tableOutput("table"))
+  )
+)
+
+server <- function(input, output){
+  output$scatter <- renderPlot({
+    ggplot(mtcars, aes(x = wt, y = mpg)) +
+      geom_point(colour = 'steelblue', size = 3) + 
+      theme_minimal()
+  })
+  
+  output$table <- renderTable({
+    data_df <- brushedPoints(mtcars, input$brush, xvar = 'wt', yvar = 'mpg')
+    data_df[, c("mpg", "wt", "carb", "cyl")]
+  })
+}
+
+shinyApp(ui, server)
+
+# Zooming with the brush --------------------------------------------------
+
+ui <- fluidPage(
+  fluidRow(
+    column(6, plotOutput("scatter", brush = 'plot_brush')),
+    column(6, plotOutput("zoom"))
+  )
+)
+
+server <- function(input, output){
+  output$scatter <- renderPlot({
+    ggplot(mtcars, aes(x = wt, y = mpg)) +
+      geom_point(colour = 'steelblue', size = 3) + 
+      theme_minimal()
+  })
+  
+  output$zoom <- renderPlot({
+    ggplot(mtcars, aes(x = wt, y = mpg)) +
+      geom_point(colour = 'steelblue', size = 3) + 
+      theme_minimal() + 
+      coord_cartesian(
+        xlim = c(input$plot_brush$xmin, input$plot_brush$xmax),
+        ylim = c(input$plot_brush$ymin, input$plot_brush$ymax)
+      )
+  })
+ 
+}
+
+shinyApp(ui, server)
