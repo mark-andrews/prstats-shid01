@@ -170,14 +170,40 @@ server <- function(input, output){
     gp1
   }
   
-  output$p1 <- renderPlot(
-    make_plot("wt", "mpg", selected())
+  output$p1 <- renderPlot({
+    make_plot(xvar = "wt", yvar = "mpg", highlight = selected())
+  }
   )
   
   output$p2 <- renderPlot(
-    make_plot("hp", "mpg", selected())
+    {
+    make_plot(xvar = "hp", yvar = "mpg", highlight = selected())
+    }
   )
 }
 
 shinyApp(ui, server)
 
+# Selecting points with a click -------------------------------------
+
+ui <- fluidPage(
+  fluidRow(
+    column(8, plotOutput("scatter", click = 'plot_click')),
+    column(4, tableOutput("table"))
+  )
+)
+
+server <- function(input, output){
+  output$scatter <- renderPlot({
+    ggplot(mtcars, aes(x = wt, y = mpg)) +
+      geom_point(colour = 'steelblue', size = 3) + 
+      theme_minimal()
+  })
+  
+  output$table <- renderTable({
+    data_df <- nearPoints(mtcars, input$plot_click, xvar = 'wt', yvar = 'mpg', threshold = 10, maxpoints = NULL)
+    data_df[, c("mpg", "wt")]
+  })
+}
+
+shinyApp(ui, server)
