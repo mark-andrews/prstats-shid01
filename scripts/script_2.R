@@ -141,3 +141,43 @@ server <- function(input, output){
 }
 
 shinyApp(ui, server)
+
+
+# Coordinated plots -------------------------------------------------------
+
+ui <- fluidPage(
+  fluidRow(
+    column(6, plotOutput("p1", brush = 'plot_brush')),
+    column(6, plotOutput("p2"))
+  )
+)
+
+server <- function(input, output){
+  
+  selected <- reactive({
+    brushedPoints(mtcars, input$plot_brush, xvar = 'wt', yvar = 'mpg')
+  })
+  
+  make_plot <- function(xvar, yvar, highlight){
+    gp1 <- ggplot(mtcars, aes(x = .data[[xvar]], y = .data[[yvar]])) +
+      geom_point(colour = 'steelblue', size = 2) + 
+      theme_minimal()
+    
+    if (nrow(highlight > 0)){
+      gp1 <- gp1 + geom_point(data = highlight, colour = 'red', size = 3)
+    }
+    
+    gp1
+  }
+  
+  output$p1 <- renderPlot(
+    make_plot("wt", "mpg", selected())
+  )
+  
+  output$p2 <- renderPlot(
+    make_plot("hp", "mpg", selected())
+  )
+}
+
+shinyApp(ui, server)
+
